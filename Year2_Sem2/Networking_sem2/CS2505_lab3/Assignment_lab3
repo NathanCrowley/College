@@ -1,0 +1,12 @@
+Questions:
+-Problem:
+    I could not get the while TRUE loop to terminate.
+
+-Solution:
+    I check if the response if an empty string and break the loop.
+
+-Problem:
+    couldnt get the if checkstatus == 200 to work.
+
+-Solution:
+    needed to change 200 to a string.

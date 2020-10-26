@@ -1,0 +1,11 @@
+Nathan Crowley -118429092
+
+1) Remote Server:
+    A) The client prints the server it is connected to along with its port.
+        It then asks the user to enter a message and its encoded, it is then send to the server decoded and then printed to the screen.
+    B) No only log what client sends.
+    C) Yes.
+
+2) Chat Program:
+    D) Yes create a second socket or use threads.
+    E) Because we need it to continuously interact with the server.

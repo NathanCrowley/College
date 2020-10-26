@@ -1,0 +1,38 @@
+2)Difference between TCP and UDP:
+	TCP = (Transmission Control Protocol):
+		SOCKET = you will need ONE TCP Socket for EACH client in application.
+		
+		GENERAL:
+		- CONNECTION-ORIENTED protocol that computers use to communicate via the Internet. 
+		- One of main protocols in TCP/IP networks. 
+		- It PROVIDES error-checking and GUARANTEES delivery of data.
+		- Reliable, checks for erros and tracks packets so data not lost.
+		- Flow-control, to ensure sender not 'overwhelmed' by too many packets.
+		- Orders data, ensures recieved data in same order as when sent.
+		- Slower, alot more to do.
+		- Best suited for applications requiring HIGH RELIABILITY:
+			World Wide Web(HTTP,HTTPS)
+			Secure Shell(SSH)
+			File Transfer Protocol(FTP)
+			Email.
+		
+
+	UDP = (User Datagram Protocol):
+		SOCKET = you can SEND and RECIEVE to/from anyone at any time with SAME SOCKET.
+
+		GENERAL:
+		- CONNECTIONLESS protocol, similiar to TCP, but assumes that error-checking and recovery 				services are NOT REQUIRED. 
+		- Instead, UPD continuously sends datagrams to the reciever whether they reciever them or 				not.
+		- Unreliable, packet may become corrupt or lost in transit.
+		- NO Flow-control, packets arrive in continuous stream or they are dropped.
+		- NO Ordering, sends data in any order.
+		- Faster.
+		- Best suited for applications requiring SPEED and EFFICIENCY:
+			VPN tunneling
+			Streaming VIDEOS
+			Online Games
+			Live Broadcasts
+			Domain Name Systems(DNS)
+			Voice over Internet Protocol(VoIP)
+			Trivial File Transfer Protocol(TFTP).
+
