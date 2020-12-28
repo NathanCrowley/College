@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cloud Assignment</title>
+<link rel="stylesheet" href="index.css"> 
+</head>
+<body>
+
+<h1>Application - Nathan Crowley 118429092</h1>
+<p>This application has a Javascript function to take users input of their age (in years) and return their year of birth.
+</p>
+<p>Enter an userID... <input type="text" id="idInput"value=""><button onclick="idFunction()">Save userID</button></p>
+<p>Enter your age in years... <input type="number" id="ageInput" value=""><button onclick="ageFunction()">Compute birth year</button></p>
+
+<p id="id"></p>
+<p id="age"></p>
+<script>
+function idFunction(){
+    var id = document.getElementById("idInput").value;
+    document.getElementById("id").innerHTML = "ID: "+id;
+    document.getElementById("id").style.color = "yellow";
+    document.getElementById("id").style.padding = "5px";
+    document.getElementById("id").style.border = "2px solid yellow";
+    document.getElementById("id").style.width = "150px";
+}
+function ageFunction(){
+ var age = document.getElementById("ageInput").value;
+ var d = new Date();
+ var n = d.getFullYear();	//n = current year
+ var yearBorn = n - age;
+ document.getElementById("age").innerHTML = 'Year born: '+yearBorn;
+ document.getElementById("age").style.color = "yellow";
+ document.getElementById("age").style.padding = "5px";
+ document.getElementById("age").style.border = "2px solid yellow";
+ document.getElementById("age").style.width = "150px";
+}
+
+</script>
+</body>
+</html>
