@@ -1,0 +1,194 @@
+
+/*
+ * - first check if there is data to be recieved from IR remote.
+ * - If so, save the buttons hex value as a String (buttonHex).
+ * - Select only the least significant byte (the last two hex numbers) using substring function to parse the hex string.
+ *    - Split the byte into the two hex digits so they can be decoded to binary later with bitRead().
+ *    - set a variable Digit used in the for loop to use a common function to create the binary of each digit.
+ *    - In this function loop twice as to get the binary of both digits.
+ *        - to decode the hex, check if it is either a number (0-9) or a letter (A-F) by comparing with the ascii value of 9.
+ *        - if its a number:
+ *            - subtract 0 from the ascii value to get the original string value as an integer.
+ *            - loop four times to bitRead() the four bits of this first digits nibble.
+ *            - print HIGH if the bit is 1, LOW if the value is 0.
+ *        - else its a letter:
+ *            - subtract 87 from the ascii value to get oringial value as an integer.
+ *            - again loop to get the binary value, using bitRead().
+*/
+#include <IRremote.h>           //include infrared remote hander file.
+int RECIERVER_PIN = 7;          //set the pin that is connected to IR Reciever.
+IRrecv irrecv(RECIERVER_PIN);  
+decode_results results;     
+
+//Pin connected to ST_CP of 74HC595
+int latchPin = 8;
+//Pin connected to SH_CP of 74HC595
+int clockPin = 12;
+////Pin connected to DS of 74HC595
+int dataPin = 11;
+
+void setup() {
+  Serial.begin(9600);           //initalise the serial monitor with 9600 bits per second data rate.
+  irrecv.enableIRIn();          //initalise to recieve IR signals.
+  pinMode(latchPin,OUTPUT);     //set all pins as OUTPUT for the main loop.
+  pinMode(clockPin,OUTPUT);
+  pinMode(dataPin,OUTPUT);
+}
+
+//0xFF7A85 - 111111110111101010000101
+/* Part A:
+ *  hex    button  binary
+ *  FF6897 0       10010111
+ *  FF30CF 1       11001111
+ *  FF18E7 2       11100111
+ *  FF7A85 3       10000101
+ *  FF10EF 4       11101111     
+ *  FF38C7 5       11000111
+ *  FF5AA5 6       10100101
+ *  FF42BD 7       10111101
+ *  FF4AB5 8       10110101
+ *  FF52AD 9       10101101
+ * 
+ * Part B:
+ *  hex    button  binary
+ *  FF6897 0       01101000 
+ *  FF30CF 1       00110000
+ *  FF18E7 2       00011000 
+ *  FF7A85 3       01111010 
+ *  FF10EF 4       00010000      
+ *  FF38C7 5       00111000 
+ *  FF5AA5 6       01011010 
+ *  FF42BD 7       01011010 
+ *  FF4AB5 8       01001010 
+ *  FF52AD 9       01010010 
+ *  
+*/
+
+/*
+ * Solution: 
+ *  - check if there is data being recieved by the IR reciever.
+ *    - check if the button is held down, which would result in 4294967295 (FFFFFFFF) repeating. 
+ *    - show the hex value in the serial monitor. This is just for myself so I know the correct "resutls.value" is being read.
+ *    - ground latchPin and hold low for as long as you are transmitting.
+ *    - call shiftOut fucntion to get binary representaion of the LSB.
+ *    - return latch pin high to signal that it no longer needs to listen for tranmitting info.
+ *  - resume the IR reciever
+ *  
+*/
+byte LSBmask = 0xff;
+void loop() {
+  if(irrecv.decode(&results)){              //returns 0 if no data ready, 1 if data ready.
+    if(results.value != 4294967295){        
+      /*PART A: */
+      digitalWrite(latchPin, LOW);          
+      shiftOut(dataPin, clockPin, LSBFIRST, results.value&LSBmask);
+      digitalWrite(latchPin, HIGH); 
+      Serial.println(results.value,HEX);
+      Serial.print("HEX Least significant Byte: ");
+      Serial.println(results.value&LSBmask, HEX); 
+      Serial.println(results.value&LSBmask, BIN);
+      delay(3000);
+      /* PART B*/  
+      digitalWrite(latchPin, LOW);          
+      shiftOut(dataPin, clockPin, LSBFIRST, (results.value&0xff00)>>8);
+      digitalWrite(latchPin, HIGH);
+      Serial.println(results.value,HEX);
+      Serial.print("HEX Middle Byte: ");
+      Serial.println((results.value&0xff00)>>8, HEX);
+      Serial.println((results.value&0xff00)>>8, BIN);
+    }
+   Serial.println();
+   irrecv.resume();     
+  }
+}
+/* PART C*/
+void myShiftOut(uint8_t clockPin, uint8_t bitOrder, uint8_t val){
+  uint8_t i;
+  for(i = 0; i <8; i++){
+    if(bitOrder == LSBFIRST){
+      digitalWrite(dataPin, !!(val & (1 << i)));
+    }else{
+      digitalWrite(dataPin, !!(val & (1 << (7 - i))));
+    }
+      digitalWrite(clockPin, HIGH);
+      digitalWrite(clockPin, LOW); 
+  }
+}
+  /*delay(1000);
+  if(irrecv.decode(&results)){              //returns 0 if no data ready, 1 if data ready.
+    if(results.value != 4294967295){
+      Serial.println(results.value);
+      Serial.println(results.value,HEX);
+      digitalWrite(latchPin, LOW);
+      shiftOut(dataPin, clockPin, LSBFIRST, results.value);
+      digitalWrite(latchPin, HIGH);
+      delay(1000); 
+    }
+  }*/
+
+    /*String buttonHex = String(results.value,HEX);
+    byte least_significant = buttonHex.substring(4,6);
+    Serial.print("Hex: ");
+    Serial.println(buttonHex);
+    int firstDigit = least_significant[0];
+    int secondDigit = least_significant[1];
+    Serial.print("Least significant byte: ");
+    Serial.println(buttonHex.substring(4,6));  
+    int Digit = firstDigit;
+    for(int i=0; i<=1;i++){  
+      if(Digit <= 57){       //9 in ascii is 57
+        //hex integer (0-9)
+        //subtract 0 from digit to get real value instead of ascii (57-48 = 9)
+        Digit = Digit - 48;    
+        for(int i=3; i>=0; i--){
+          int Bit=0;
+          Bit = bitRead(Digit,i);
+          if(Bit == 1){
+            Serial.print("1");
+          }else{Serial.print("0");}
+        }
+      }else{
+        //hex letter (a-f)
+        Digit = Digit - 87;
+        for(int i=3; i>=0; i--){
+          int Bit=0;
+          Bit = bitRead(Digit,i);
+          if(Bit == 1){
+            Serial.print("1");
+          }else{Serial.print("0");}
+        }
+      }
+      Digit = secondDigit;
+    }
+    Serial.println();*/
+    /*
+     * convert the char to its integer so you can use bitRead() in a loop to get the binary of say A (10) = 1010
+    */
+
+    /*if(least_significant != 0){         // check if the button is constantly pressed, if it is, ignore it.
+    Serial.println(code1);
+    Serial.print("Least significant: ");
+    Serial.println(least_significant);     //least significant byte
+    int firstBit = least_significant/10;    //first digit of byte, we seperate the digits so we can loop through each nibble and print its binary 
+    int secondBit = least_significant%10;
+    //first
+    for(int i=3; i>=0; i--){
+      int Bit=0;
+      Bit = bitRead(firstBit,i);
+      if(Bit == 1){
+        Serial.print("High");
+      }else{Serial.print("Low");}
+    }
+    //second
+    for(int i=3; i>=0; i--){
+      int Bit=0;
+      Bit = bitRead(secondBit,i);
+      if(Bit == 1){
+        Serial.print("High");
+      }else{Serial.print("Low");}      
+    }
+    Serial.println();*/
+
+    
+    /*Serial.print("Middle: ");
+    Serial.println(code1.substring(2,4));     //middle byte*/
